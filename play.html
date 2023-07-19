@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>打寶練功</title>
+	<script src="jquery-3.2.1.min.js"></script>
+</head>
+<style>
+    body{
+    	margin: 0;
+	    background-image: url("bg.png");
+	    background-size: 100%;
+        background-repeat: no-repeat;
+    }
+	img{
+		position: absolute;
+	}
+	#player{
+		height: 400px;
+		width: 480px;
+        bottom: 120px;
+        left: 15%;
+	}
+    #monster{
+        height: 400px;
+		width: 400px;
+        bottom: 150px;
+        right: 20%;
+    }
+    #dmbox{
+    	position: absolute;
+        height: 50px;
+		width: 50px;
+        bottom: 500px;
+        right: 30%;
+    }
+    .da{
+    	position: absolute;
+    	font-size: 30px;
+    	color: #F1D067;
+    }
+    #m_life{
+    	position: absolute;
+        height: 20px;
+		width: 400px;
+        bottom: 100px;
+        right: 20%;
+    	background-color: #E43333;
+    }
+    #data{
+    	background-color: rgba(0, 0, 0, 0.6);
+    	color: #FFFFFF;
+    }
+    #m_life_v{
+    	color: #FFFFFF;
+    	float: right;
+    }
+    #exp{
+    	position: absolute;
+        height: 20px;
+		width: 100%;
+        bottom: 0px;
+        margin: 0;
+    	background-color: #E8E8E8;
+    }
+    #exp_v{
+    	position: absolute;
+    	bottom: 0px;
+    }
+    #ab_box img{
+
+        height: 20px;
+		width: 20px;
+		margin: 1px;
+    }
+    #ab_box{
+    	color: #FFFFFF;
+    	position: absolute;
+		top: 80px;
+    }
+    #ab_box #ab_point{
+    	padding-bottom: 30px;
+    }
+    #ab_box .ab_text{
+    	margin-left: 30px;
+    }
+</style>
+<body>
+    <div id="data"><span id="lv"></span>
+                   <span id="dam"></span>
+                   <span id="spd"></span><br>
+                   <span id="time"></span><span id="stage"></span>
+    </div>
+
+    <div id="ab_box"><span id="ab_point">能力點數</span><br>
+    <img src="plus_b.png" alt="plus_b" id="add_dmg"><span class="ab_text" id="dmg_ab"></span><br>
+    <img src="plus_b.png" alt="plus_b" id="add_spd"><span class="ab_text" id="spd_ab"></span>
+
+    </div>
+	<img src="01.png" alt="player" id="player">
+	<img src="02.png" alt="monster" id="monster">
+	<div id="dmbox"></div>
+    <div id="m_life"><span id="m_life_v"></span></div>
+    <div id="exp"></div><span id="exp_v"></span>
+</body>
+<script>
+m_life_max = 500; 
+m_life = m_life_max; //400px
+exp_max = 50; 
+exp = 0;
+stage = 0; $("#stage").text(" 擊殺 "+stage+" 隻怪物");
+
+
+$("#m_life_v").text(m_life);
+
+$("#exp_v").text("經驗值 "+exp+"/"+exp_max);
+$("#exp").css({"width": (exp/(exp_max/100))+"%"});
+
+
+lv = 1;$("#lv").text("等級 "+lv);
+ab_point = 100;$("#ab_point").text("能力點數 "+ab_point);
+dmg_ab = 0;$("#dmg_ab").text("攻擊能力 "+dmg_ab);
+dam = 100;$("#dam").text("攻擊力 "+dam);
+spd_ab = 0;$("#spd_ab").text("攻速能力 "+spd_ab+"/80");
+spd = 100;$("#spd").text("攻速 "+spd);
+
+function myLoop () {          
+    setTimeout(function () {    
+
+   	  var dm = Math.floor((Math.random() * (dam*0.2)) + 1)+(dam*0.9);
+      m_life =  m_life - dm;
+
+      $("#m_life_v").text(m_life);
+      $("#m_life").css({"width": (m_life/(m_life_max/400))+"px"});
+
+      var newElement = $('<b class="da">'+dm+'</b>');
+      $('#dmbox').append(newElement);
+
+      var hit_sound = $("<audio></audio>").attr({
+          'src':'hit.mp3',
+          'autoplay':'autoplay'
+          }).prop("volume", 0.1);
+
+      newElement.animate({
+
+        bottom: "+=80"
+      }, 800, function() {
+
+      $( this ).remove();
+      });
+   
+    if (m_life <= 0){
+        m_dead ();
+    }
+    else{
+      	myLoop(); 
+    }
+
+ 
+    }, (1000-spd)) //攻速
+}
+
+s=0;
+m=0;
+function time () {          
+   setTimeout(function () {    
+
+    $("#time").text(m+":"+s);
+    s++;
+    time();
+   }, 1000)
+}
+
+myLoop();    
+time(); 
+
+function m_dead () {
+	stage = stage + 1;
+    $("#stage").text(" 擊殺 "+stage+" 隻怪物");
+    exp = exp + 17;
+    if(exp>=exp_max) lv_up ();
+
+    $("#exp_v").text("經驗值 "+exp+"/"+exp_max);
+    $("#exp").css({"width": (exp/(exp_max/100))+"%"});
+
+    $('#monster').animate({
+
+       opacity: "0"
+    }, 800, function() {
+       m_born ();
+    });
+}
+
+function m_born () {
+
+	//m_life_max = m_life_max + 33;
+
+    $('#monster').animate({
+
+       opacity: "1"
+    }, 100, function() {
+
+       m_life = m_life_max;
+       $("#m_life_v").text(m_life);
+       $("#m_life").css({"width": (m_life/(m_life_max/400))+"px"});
+       myLoop(); 
+    });
+}
+
+
+function lv_up () {
+
+	      var hit_sound = $("<audio></audio>").attr({
+          'src':'lv_up.wav',
+          'autoplay':'autoplay'
+          }).prop("volume", 0.6);
+
+
+exp = exp-exp_max;
+exp_max = exp_max+8;
+lv++;
+$("#lv").text("等級 "+lv);
+ab_point++;
+$("#ab_point").text("能力點數 "+ab_point);
+}
+
+
+$( "#add_dmg" ).click(function() {
+
+    if (ab_point!=0){
+    dam=dam+30;
+    dmg_ab++;
+    ab_point--;
+    $("#ab_point").text("能力點數 "+ab_point);
+    $("#dmg_ab").text("攻擊能力 "+dmg_ab);
+    $("#dam").text("攻擊力 "+dam);
+  }
+});
+
+spd_c = 30; //控制攻速成長曲線
+$( "#add_spd" ).click(function() {
+
+    if (ab_point!=0&&spd_ab<=79){
+    spd=spd+spd_c;
+    spd_ab++;
+    ab_point--;
+    if(spd_ab>=10&&spd_ab<16)spd_c=25;
+    else if (spd_ab>=16&&spd_ab<23)spd_c=15;
+    else if (spd_ab>=23&&spd_ab<30)spd_c=10;
+    else if (spd_ab>=30&&spd_ab<55)spd_c=5;
+    else if (spd_ab>=55&&spd_ab<70)spd_c=3;
+    $("#ab_point").text("能力點數 "+ab_point);
+    $("#spd_ab").text("攻速能力 "+spd_ab+"/80");
+    $("#spd").text("攻速 "+spd);
+  }
+});
+
+
+</script>
+</html>
